@@ -27,6 +27,12 @@
  */
 @property (nonatomic, readonly, copy, nonnull) NSString *recipientTitle;
 
+/** A generic reference to a model.
+ 
+ You can use this to keep track of what a recipient points to.
+ */
+@property (nonatomic, readonly, strong, nullable) id address;
+
 @end
 
 
@@ -50,12 +56,6 @@
  This is for backwards compatability. Use `recipientTitle` instead.
  */
 @property (nonatomic, readonly, copy, nonnull) NSString *title __attribute__((deprecated));
-
-/** A generic reference to a model.
- 
- You can use this to keep track of what a recipient points to.
- */
-@property (nonatomic, readonly, strong, nullable) id address;
 
 
 /** Create a new recipient.
