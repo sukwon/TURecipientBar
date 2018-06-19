@@ -461,7 +461,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	
 	_textField = [[UITextField alloc] init];
 	_textField.text = TURecipientsPlaceholder;
-	_textField.font = [UIFont systemFontOfSize:15.0];
+	_textField.font = [UIFont systemFontOfSize:17.0];
 	_textField.textColor = [UIColor blackColor];
 	_textField.delegate = self;
 	_textField.autocorrectionType = UITextAutocorrectionTypeNo;
@@ -475,7 +475,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	
 	_summaryLabel = [[UILabel alloc] init];
 	_summaryLabel.backgroundColor = [UIColor clearColor];
-	_summaryLabel.font = [UIFont systemFontOfSize:15.0];
+	_summaryLabel.font = [UIFont systemFontOfSize:17.0];
 	[self addSubview:_summaryLabel];
 	
 	
@@ -929,7 +929,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	[path stroke];
 	
 	background = UIGraphicsGetImageFromCurrentImageContext();
-	background = [background imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+	background = [background imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
 	background = [background stretchableImageWithLeftCapWidth:14 topCapHeight:0];
 	
 	UIGraphicsEndImageContext();
@@ -948,11 +948,12 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	UIGraphicsBeginImageContextWithOptions(bounds.size, NO, 0);
 	
 	UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:12];
-	[[UIColor blackColor] setFill];
+	UIColor *hearsayRed = [UIColor colorWithRed:207.0/255.0 green:10.0/255.0 blue:44.0/255.0 alpha:1];
+	[hearsayRed setFill];
 	[path fill];
 	
 	background = UIGraphicsGetImageFromCurrentImageContext();
-	background = [background imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+	background = [background imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
 	background = [background stretchableImageWithLeftCapWidth:14 topCapHeight:0];
 	
 	UIGraphicsEndImageContext();
@@ -1035,17 +1036,17 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	if (attributes == nil) {
 		if (state == UIControlStateNormal) {
 			attributes = @{
-						   NSFontAttributeName: [UIFont systemFontOfSize:15.0],
+						   NSFontAttributeName: [UIFont systemFontOfSize:17.0],
 						   NSForegroundColorAttributeName: self.tintColor,
 						   };
 		} else if (state == UIControlStateHighlighted) {
 			attributes = @{
-						   NSFontAttributeName: [UIFont systemFontOfSize:15.0],
+						   NSFontAttributeName: [UIFont systemFontOfSize:17.0],
 						   NSForegroundColorAttributeName: [UIColor whiteColor],
 						   };
 		} else if (state == UIControlStateSelected) {
 			attributes = @{
-						   NSFontAttributeName: [UIFont systemFontOfSize:15.0],
+						   NSFontAttributeName: [UIFont systemFontOfSize:17.0],
 						   NSForegroundColorAttributeName: [UIColor whiteColor],
 						   };
 		}
@@ -1068,7 +1069,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	if (_searchFieldTextAttributes[NSFontAttributeName] != nil) {
 		_textField.font = _searchFieldTextAttributes[NSFontAttributeName];
 	} else {
-		_textField.font = [UIFont systemFontOfSize:16.0];
+		_textField.font = [UIFont systemFontOfSize:17.0];
 	}
 	
 	if (_searchFieldTextAttributes[NSForegroundColorAttributeName] != nil) {
