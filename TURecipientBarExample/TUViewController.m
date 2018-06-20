@@ -32,6 +32,7 @@
     self.recipientsBar.showsAddButton = NO;
     self.recipientsBar.placeholder = NSLocalizedString(@"Type names...", nil);
     self.recipientsBar.displayMode = TURecipientsBarDisplayModeExpanded;
+    [self.recipientsBar becomeFirstResponder];
 //    self.recipientsBar.label = @"Send To: ";
 //    self.recipientsBar.label = @"";
     

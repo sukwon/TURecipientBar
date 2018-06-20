@@ -332,7 +332,7 @@ static void *TURecipientsContext = &TURecipientsContext;
 		}
 		
 		if (recipientsBar.text.length > 0) {
-			[self _createRecipientForRecipientsBar:recipientsBar];
+//            [self _createRecipientForRecipientsBar:recipientsBar];
 		}
 	}
 	
@@ -393,7 +393,7 @@ static void *TURecipientsContext = &TURecipientsContext;
 	
 	if (should) {
 		if (recipientsBar.text.length > 0) {
-			[self _createRecipientForRecipientsBar:recipientsBar];
+//            [self _createRecipientForRecipientsBar:recipientsBar];
 		}
 	}
 	

@@ -24,7 +24,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 @property (nonatomic) BOOL expanded;
 @property (nonatomic) BOOL editing;
 @property (nonatomic) NSMutableArray<UITextField *> *textFields;
-@property (nonatomic, getter = isAddingNewTextFields) BOOL addingNewTextFields;
+@property (nonatomic, getter = isMovingTextFieldDown) BOOL movingTextFieldDown;
 
 @end
 
@@ -162,6 +162,9 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	if ([self.recipientsBarDelegate respondsToSelector:@selector(recipientsBar:didAddRecipient:)]) {
 		[self.recipientsBarDelegate recipientsBar:self didAddRecipient:recipient];
 	}
+	
+	self.movingTextFieldDown = NO;
+	
 	[self _updateSummary];
 }
 
@@ -453,6 +456,8 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	_showsAddButton = YES;
 	_showsShadows = YES;
 	_animatedRecipientsInAndOut = YES;
+	_movingTextFieldDown = NO;
+
 	_recipientBackgroundImages = [NSMutableDictionary new];
 	_recipientTitleTextAttributes = [NSMutableDictionary new];
 	
@@ -487,6 +492,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	
 	_textField = [[NonSelectableTextField alloc] init];
 	_textField.backgroundColor = [UIColor clearColor];
+	_textField.backgroundColor = [UIColor yellowColor];
 	_textField.text = TURecipientsPlaceholder;
 	_textField.font = [UIFont systemFontOfSize:17.0];
 	_textField.textColor = [UIColor blackColor];
@@ -585,7 +591,8 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	recipientViewFrame.origin.y = CGRectGetMidY(lastView.frame) - recipientViewFrame.size.height / 2.0;
 	
 	if ((CGRectGetMaxX(recipientViewFrame) > [self _safeBounds].size.width - 6.0) ||
-		(recipientView != _textField && [recipientView isKindOfClass:[UITextField class]])) {
+		(recipientView != _textField && [recipientView isKindOfClass:[UITextField class]]) ||
+		(recipientView == _textField && self.isMovingTextFieldDown == true)) {
 		recipientViewFrame.origin.x = CGRectGetMinX([self _safeBounds]) + 15.0;
 		recipientViewFrame.origin.y += TURecipientsLineHeight - 4.0;
 	}
@@ -637,7 +644,6 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 			
 			recipientView.frame = recipientViewFrame;
 			
-			
 			lastView = recipientView;
 		}
 		
@@ -664,7 +670,8 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 		_lineView.frame = CGRectMake(0.0, self.contentOffset.y + self.bounds.size.height - lineHeight, self.bounds.size.width, lineHeight);
 	}
 	
-	if (self.expanded && (!self.searching || self.showsMultipleLinesWhileSearching || self.textFields.count > 0)) {
+	if (self.expanded &&
+		(!self.searching || self.showsMultipleLinesWhileSearching || self.isMovingTextFieldDown == true)) {
 		self.heightConstraint.constant = self.contentSize.height;
 	} else {
 		self.heightConstraint.constant = TURecipientsLineHeight;
@@ -803,7 +810,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 
 - (void)_updateRecipientTextField
 {
-	BOOL isHidden = _selectedRecipient != nil || !self.editing;
+	BOOL isHidden = (_selectedRecipient != nil || !self.editing);
 	_textField.hidden = isHidden;
 	for (UITextField *textField in self.textFields) {
 		textField.hidden = isHidden;
@@ -883,13 +890,20 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	if ([[textField.text substringWithRange:range] isEqual:TURecipientsPlaceholder]) {
 		[textField removeFromSuperview];
 		[self.textFields removeLastObject];
-		[self.textFields.firstObject becomeFirstResponder];
 		
 		if (self.textFields.count == 0) {
-			self.addingNewTextFields = false;
+			self.textField.userInteractionEnabled = YES;
+		} else {
+			self.textFields.lastObject.userInteractionEnabled = YES;
 		}
 		
+		[self.textFields.firstObject becomeFirstResponder];
+
 		[self _setNeedsRecipientLayout];
+	} else if (_selectedRecipient != nil) {
+		//replace the selected recipient
+		[self removeRecipient:_selectedRecipient];
+		self.selectedRecipient = nil;
 	}
 	
 	BOOL delegateResponse = YES;
@@ -900,26 +914,35 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	return delegateResponse;
 }
 
-- (void)_addTempTextField {
-	UITextField *textField = [[NonSelectableTextField alloc] init];
-	textField.backgroundColor = [UIColor clearColor];
-	textField.frame = [self _frameFoRecipientView:textField afterView:_recipientViews.lastObject];
-	textField.text = TURecipientsPlaceholder;
-	textField.font = [UIFont systemFontOfSize:17.0];
-	textField.textColor = [UIColor blackColor];
-	textField.delegate = self;
-	textField.autocorrectionType = UITextAutocorrectionTypeNo;
-	textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-	textField.spellCheckingType = UITextSpellCheckingTypeNo;
-	textField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-	[textField addTarget:self action:@selector(textFieldEditingChanged:) forControlEvents:UIControlEventEditingChanged];
-	[self addSubview:textField];
-	[textField addObserver:self forKeyPath:@"selectedTextRange" options:0 context:TURecipientsSelectionContext];
-	
-	[textField becomeFirstResponder];
-	
-	[self.textFields addObject:textField];
-	self.addingNewTextFields = YES;
+- (void)_handleMultipleTextFields {
+	if (self.textFields.count == 0 && self.movingTextFieldDown == NO) {
+		self.movingTextFieldDown = YES;
+	} else {
+		self.textField.userInteractionEnabled = NO;
+		for (UITextField *textField in self.textFields) {
+			textField.userInteractionEnabled = NO;
+		}
+		
+		UITextField *textField = [[NonSelectableTextField alloc] init];
+		textField.backgroundColor = [UIColor clearColor];
+		textField.backgroundColor = [UIColor blueColor];
+		textField.frame = [self _frameFoRecipientView:textField afterView:_recipientViews.lastObject];
+		textField.text = TURecipientsPlaceholder;
+		textField.font = [UIFont systemFontOfSize:17.0];
+		textField.textColor = [UIColor blackColor];
+		textField.delegate = self;
+		textField.autocorrectionType = UITextAutocorrectionTypeNo;
+		textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+		textField.spellCheckingType = UITextSpellCheckingTypeNo;
+		textField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+		[textField addTarget:self action:@selector(textFieldEditingChanged:) forControlEvents:UIControlEventEditingChanged];
+		[self addSubview:textField];
+		[textField addObserver:self forKeyPath:@"selectedTextRange" options:0 context:TURecipientsSelectionContext];
+		
+		[textField becomeFirstResponder];
+		
+		[self.textFields addObject:textField];
+	}
 	
 	[self _setNeedsRecipientLayout];
 }
@@ -928,7 +951,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	if (((textField == self.textField) || (self.textFields.count > 0)) &&
 		![textField.text isEqualToString:TURecipientsPlaceholder] &&
 		([textField sizeThatFits:textField.frame.size].width > textField.bounds.size.width - 10)) {
-		[self _addTempTextField];
+		[self _handleMultipleTextFields];
 	}
 	
 	if ([self.recipientsBarDelegate respondsToSelector:@selector(recipientsBar:textDidChange:)]) {
