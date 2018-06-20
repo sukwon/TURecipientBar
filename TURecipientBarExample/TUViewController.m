@@ -29,8 +29,9 @@
     // we don't want our initial state to animate in
     self.recipientsBar.animatedRecipientsInAndOut = NO;
     
-//    self.recipientsBar.showsAddButton = NO;
-//    self.recipientsBar.placeholder = NSLocalizedString(@"Type names...", nil);
+    self.recipientsBar.showsAddButton = NO;
+    self.recipientsBar.placeholder = NSLocalizedString(@"Type names...", nil);
+    self.recipientsBar.displayMode = TURecipientsBarDisplayModeExpanded;
 //    self.recipientsBar.label = @"Send To: ";
 //    self.recipientsBar.label = @"";
     
