@@ -492,7 +492,6 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 	
 	_textField = [[NonSelectableTextField alloc] init];
 	_textField.backgroundColor = [UIColor clearColor];
-	_textField.backgroundColor = [UIColor yellowColor];
 	_textField.text = TURecipientsPlaceholder;
 	_textField.font = [UIFont systemFontOfSize:17.0];
 	_textField.textColor = [UIColor blackColor];
@@ -810,7 +809,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 
 - (void)_updateRecipientTextField
 {
-	BOOL isHidden = (_selectedRecipient != nil || !self.editing);
+	BOOL isHidden = (!self.editing);
 	_textField.hidden = isHidden;
 	for (UITextField *textField in self.textFields) {
 		textField.hidden = isHidden;
@@ -867,6 +866,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 		//replace the selected recipient
 		[self removeRecipient:_selectedRecipient];
 		self.selectedRecipient = nil;
+		return YES;
 	}
 
 	//adjust to protect our placeholder character
@@ -904,6 +904,7 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 		//replace the selected recipient
 		[self removeRecipient:_selectedRecipient];
 		self.selectedRecipient = nil;
+		return YES;
 	}
 	
 	BOOL delegateResponse = YES;
@@ -925,7 +926,6 @@ void *TURecipientsSelectionContext = &TURecipientsSelectionContext;
 		
 		UITextField *textField = [[NonSelectableTextField alloc] init];
 		textField.backgroundColor = [UIColor clearColor];
-		textField.backgroundColor = [UIColor blueColor];
 		textField.frame = [self _frameFoRecipientView:textField afterView:_recipientViews.lastObject];
 		textField.text = TURecipientsPlaceholder;
 		textField.font = [UIFont systemFontOfSize:17.0];
